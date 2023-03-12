@@ -2,6 +2,7 @@
 namespace GDO\ChatGPT;
 
 use GDO\Core\GDO;
+use GDO\File\GDT_File;
 
 /**
  * A chatgpt file to train on.
@@ -13,7 +14,9 @@ final class GDO_ChatMemory extends GDO
 {
 	public function gdoColumns(): array
 	{
-		return [];
+		return [
+			GDT_File::make()
+		];
 	}
 
 }

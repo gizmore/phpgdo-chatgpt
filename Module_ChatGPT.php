@@ -4,6 +4,7 @@ namespace GDO\ChatGPT;
 use GDO\Core\GDO_Module;
 use GDO\Core\GDT_Secret;
 use GDO\Core\WithComposer;
+use OpenAI\Client;
 
 /**
  * ChatGPT bindings.
@@ -55,6 +56,20 @@ final class Module_ChatGPT extends GDO_Module
 		{
 			$this->saveConfigVar('chatgpt_apikey', $apikey);
 		}
+	}
+	
+	###########
+	### API ###
+	###########
+	private Client $client;
+	public function getClient(): Client
+	{
+		if (!isset($this->client))
+		{
+			$this->includeVendor();
+			$this->client = \OpenAI::client($this->cfgApiKey());
+		}
+		return $this->client;
 	}
 	
 }
