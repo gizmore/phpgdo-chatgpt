@@ -7,12 +7,13 @@ use GDO\File\GDT_File;
 
 /**
  * A chatgpt file to train on.
- * 
- * @author gizmore
+ *
  * @version 7.0.2
+ * @author gizmore
  */
 final class GDO_ChatMemory extends GDO
 {
+
 	public function gdoColumns(): array
 	{
 		return [
