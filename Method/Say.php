@@ -5,6 +5,7 @@ namespace GDO\ChatGPT\Method;
 use GDO\ChatGPT\Module_ChatGPT;
 use GDO\CLI\Method\Ekko;
 use GDO\Core\GDT;
+use GDO\Core\GDT_String;
 use GDO\Form\GDT_Form;
 
 /**
@@ -21,6 +22,8 @@ final class Say extends Ekko
 	public function execute(): GDT
 	{
 		$gpt = Module_ChatGPT::instance()->getClient();
+        $result = 'yes';
+        return GDT_String::make('response')->initial($result);
 	}
 
 }
