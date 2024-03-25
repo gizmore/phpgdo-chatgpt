@@ -84,6 +84,7 @@ final class GDO_Conversation extends GDO
      */
     public function close(): bool
     {
+        GDO_GPTMessage::clearMessageQueue($this);
         $this->delete();
         return true;
     }

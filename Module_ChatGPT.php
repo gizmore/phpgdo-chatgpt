@@ -74,16 +74,16 @@ final class Module_ChatGPT extends GDO_Module
 	### API ###
 	###########
 
-    public function getAPI(): OpenAI
-    {
-        if (!isset($this->openai))
-        {
-            $this->includeVendor();
-            $this->openai = new OpenAI($this->cfgApiKey());
-        }
-        return $this->openai;
-
-    }
+//    public function getAPI(): OpenAI
+//    {
+//        if (!isset($this->openai))
+//        {
+//            $this->includeVendor();
+//            $this->openai = new OpenAI($this->cfgApiKey());
+//        }
+//        return $this->openai;
+//
+//    }
 
 	public function getClient(): Client
 	{

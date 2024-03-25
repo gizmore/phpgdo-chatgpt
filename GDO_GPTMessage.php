@@ -41,10 +41,15 @@ final class GDO_GPTMessage extends GDO
             ->limit($historyCount)
             ->exec()->fetchAllObjects();
 
-        $now = Time::getDate();
-        self::table()->update()->set("gptm_sent='{$now}'")->where("gptm_conversation={$conversation->getID()} AND gptm_sent IS NULL")->exec();
+        self::clearMessageQueue($conversation);
 
         return $messages;
+    }
+
+    public static function clearMessageQueue(GDO_Conversation $conversation): void
+    {
+        $now = Time::getDate();
+        self::table()->update()->set("gptm_sent='{$now}'")->where("gptm_conversation={$conversation->getID()} AND gptm_sent IS NULL")->exec();
     }
 
     public function gdoColumns(): array
