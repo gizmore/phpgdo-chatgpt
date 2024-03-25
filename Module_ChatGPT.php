@@ -4,9 +4,11 @@ namespace GDO\ChatGPT;
 use GDO\Core\GDO_Module;
 use GDO\Core\GDT_Secret;
 use GDO\Core\WithComposer;
-use OpenAI;
+use GDO\User\GDO_User;
+use GDO\User\GDT_User;
+use GDO\User\GDT_UserType;
 use OpenAI\Client;
-
+use OpenAI;
 /**
  * ChatGPT bindings.
  *
@@ -20,17 +22,20 @@ final class Module_ChatGPT extends GDO_Module
 
 	private Client $client;
 
+    private OpenAI $openai;
+
 	public function getDependencies(): array
 	{
 		return [
-			'File',
+            'Dog',
 		];
 	}
 
 	public function getClasses(): array
 	{
 		return [
-			GDO_ChatMemory::class,
+            GDO_Conversation::class,
+            GDO_GPTMessage::class,
 		];
 	}
 
@@ -38,6 +43,7 @@ final class Module_ChatGPT extends GDO_Module
 	{
 		return [
 			GDT_Secret::make('chatgpt_apikey'),
+            GDT_User::make('chatgpt_user')->notNull(),
 		];
 	}
 
@@ -54,18 +60,38 @@ final class Module_ChatGPT extends GDO_Module
 		{
 			$this->saveConfigVar('chatgpt_apikey', $apikey);
 		}
+        if (!$this->cfgApiUser())
+        {
+            if (!($user = GDO_User::getByName('ChatGPT')))
+            {
+                $user = $this->onInstallUser();
+            }
+            $this->saveConfigVar('chatgpt_user', $user->getID());
+        }
 	}
 
 	###########
 	### API ###
 	###########
 
+    public function getAPI(): OpenAI
+    {
+        if (!isset($this->openai))
+        {
+            $this->includeVendor();
+            $this->openai = new OpenAI($this->cfgApiKey());
+        }
+        return $this->openai;
+
+    }
+
 	public function getClient(): Client
 	{
 		if (!isset($this->client))
 		{
 			$this->includeVendor();
-			$this->client = OpenAI::client($this->cfgApiKey());
+            $key = $this->cfgApiKey();
+			$this->client = OpenAI::client($key);
 		}
 		return $this->client;
 	}
@@ -74,5 +100,18 @@ final class Module_ChatGPT extends GDO_Module
 	{
 		return $this->getConfigVar('chatgpt_apikey');
 	}
+
+    public function cfgApiUser(): ?GDO_User
+    {
+        return $this->getConfigValue('chatgpt_user');
+    }
+
+    private function onInstallUser(): GDO_User
+    {
+        return GDO_User::blank([
+            'user_type' => GDT_UserType::BOT,
+            'user_name' => 'ChatGPT',
+        ])->insert();
+    }
 
 }

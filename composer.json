@@ -1,5 +1,7 @@
 {
   "require": {
-    "openai-php/client": "^0.3.5"
+    "openai-php/client": "*",
+    "symfony/http-client": "^7.0",
+    "nyholm/psr7": "^1.8"
   }
 }
