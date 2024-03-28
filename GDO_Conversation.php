@@ -60,12 +60,19 @@ final class GDO_Conversation extends GDO
             GDT_Room::make('gptc_room'),
             GDT_Title::make('gptc_title')->max(256)->notNull(false),
             GDT_LanguageModel::make('gptc_model'),
+            GDT_Text::make('gptc_genome'),
 //            GDT_UInt::make('gptc_history_count')->notNull()->bytes(2)->initial('4'),
             GDT_CreatedAt::make('gptc_created'),
             GDT_CreatedBy::make('gptc_creator'),
             GDT_DeletedAt::make('gptc_deleted'),
             GDT_DeletedBy::make('gptc_deletor'),
         ];
+    }
+
+    public function getGenome(): string
+    {
+        $genome = $this->gdoVar('gptc_genome');
+        return $genome ?: "\n";
     }
 
     public function getCID(): string
@@ -92,7 +99,7 @@ final class GDO_Conversation extends GDO
     /**
      * @throws GDO_DBException
      */
-    public function promptTheAI(int $historyCount): string
+    public function promptTheAI(int $historyCount, float $temperature): string
     {
         $openai = $this->getAI();
         $messages = [
@@ -108,6 +115,7 @@ final class GDO_Conversation extends GDO
         $response = $openai->chat()->create([
             'model' => $this->getAIModelName(),
             'messages' => $messages,
+            'temperature' => $temperature,
         ]);
 
         if ($aitext = @$response['choices'][0]['message']['content'])
@@ -115,7 +123,7 @@ final class GDO_Conversation extends GDO
             GDO_GPTMessage::blank([
                 'gptm_conversation' => $this->getID(),
                 'gptm_text' => $aitext,
-                'gptm_creator' => Module_ChatGPT::instance()->cfgApiUser()->getID(),
+                'gptm_creator' => Module_ChatGPT::instance()->cfgApiDogUser(DOG_Message::$LAST_MESSAGE->server)->getGDOUser()->getID(),
                 'gptm_sent' => Time::getDate(),
             ])->insert();
         }
@@ -130,12 +138,27 @@ final class GDO_Conversation extends GDO
 
     private function getAIModel(): ?string
     {
-        return $this->getAIModelColumn()->modelDescription();
+        return $this->getAIModelColumn()->modelDescription() . $this->getGenome();
     }
 
     private function getAIModelName(): string
     {
         return $this->getAIModelColumn()->modelName();
+    }
+
+    /**
+     * @throws GDO_DBException
+     */
+    public function addAxiom(string $genome): void
+    {
+        $old = $this->getGenome();
+        $new = "{$old}{$genome}\n";
+        $this->saveVar('gptc_genome', $new);
+    }
+
+    public function getRoom(): DOG_Room
+    {
+        return $this->gdoValue('gptc_room');
     }
 
 }

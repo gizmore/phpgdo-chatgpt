@@ -1,9 +1,14 @@
 <?php
 namespace GDO\ChatGPT;
 
+use GDO\Core\GDO_DBException;
 use GDO\Core\GDO_Module;
 use GDO\Core\GDT_Secret;
 use GDO\Core\WithComposer;
+use GDO\Dog\Connector\Bash;
+use GDO\Dog\DOG_Message;
+use GDO\Dog\DOG_Server;
+use GDO\Dog\DOG_User;
 use GDO\User\GDO_User;
 use GDO\User\GDT_User;
 use GDO\User\GDT_UserType;
@@ -60,14 +65,14 @@ final class Module_ChatGPT extends GDO_Module
 		{
 			$this->saveConfigVar('chatgpt_apikey', $apikey);
 		}
-        if (!$this->cfgApiUser())
-        {
-            if (!($user = GDO_User::getByName('ChatGPT')))
-            {
-                $user = $this->onInstallUser();
-            }
-            $this->saveConfigVar('chatgpt_user', $user->getID());
-        }
+//        if (!$this->cfgApiUser())
+//        {
+//            if (!($user = GDO_User::getByName('ChatGPT')))
+//            {
+//                $user = $this->onInstallUser();
+//            }
+//            $this->saveConfigVar('chatgpt_user', $user->getID());
+//        }
 	}
 
 	###########
@@ -101,17 +106,33 @@ final class Module_ChatGPT extends GDO_Module
 		return $this->getConfigVar('chatgpt_apikey');
 	}
 
-    public function cfgApiUser(): ?GDO_User
+//    public function cfgApiUser(): ?GDO_User
+//    {
+//        return $this->getConfigValue('chatgpt_user');
+//    }
+
+    /**
+     * @throws GDO_DBException
+     */
+    public function cfgApiDogUser(DOG_Server $server): ?DOG_User
     {
-        return $this->getConfigValue('chatgpt_user');
+        return DOG_User::getOrCreateUser($server, 'ChatGPT');
     }
 
-    private function onInstallUser(): GDO_User
-    {
-        return GDO_User::blank([
-            'user_type' => GDT_UserType::BOT,
-            'user_name' => 'ChatGPT',
-        ])->insert();
-    }
+//    /**
+//     * @throws GDO_DBException
+//     */
+//    private function onInstallUser(): GDO_User
+//    {
+////        return GDO_User::blank([
+////            'user_type' => GDT_UserType::BOT,
+////            'user_name' => 'ChatGPT',
+////        ])->insert();
+//        $doguser = DOG_User::getOrCreateUser(Bash::instance()->server, 'ChatGPT');
+//        $gdouser = $doguser->getGDOUser();
+//        $gdouser->saveVar('user_type', GDT_UserType::BOT);
+//        return $gdouser;
+//    }
+
 
 }

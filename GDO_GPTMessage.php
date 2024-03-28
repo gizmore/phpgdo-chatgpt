@@ -23,6 +23,7 @@ final class GDO_GPTMessage extends GDO
 
     public static function log(GDO_Conversation $conversation, DOG_Message $message): void
     {
+        echo "GPT logging {$message->text}\n";
         self::blank([
             'gptm_conversation' => $conversation->getID(),
             'gptm_text' => $message->text,
@@ -36,7 +37,7 @@ final class GDO_GPTMessage extends GDO
     public static function getLast(GDO_Conversation $conversation, int $historyCount): array
     {
         $messages = self::table()->select()
-            ->where("gptm_conversation={$conversation->getID()} AND gptm_sent IS NULL")
+            ->where("gptm_conversation={$conversation->getID()}")
             ->order("gptm_created DESC")
             ->limit($historyCount)
             ->exec()->fetchAllObjects();
@@ -64,6 +65,14 @@ final class GDO_GPTMessage extends GDO
         ];
     }
 
+    public function getConversation(): GDO_Conversation
+    {
+        return $this->gdoValue('gptm_conversation');
+    }
+
+    /**
+     * @throws GDO_DBException
+     */
     public function renderChatGPT(): array
     {
         $user = $this->getUser();
@@ -74,6 +83,13 @@ final class GDO_GPTMessage extends GDO
             return [
                 'role' => 'assistant',
                 'content' => "{$username}::{$message}",
+            ];
+        }
+        elseif ($this->isDog())
+        {
+            return [
+                'role' => 'assistant',
+                'content' => "Dog::{$message}",
             ];
         }
         return [
@@ -92,9 +108,18 @@ final class GDO_GPTMessage extends GDO
         return $this->gdoVar('gptm_text');
     }
 
+    /**
+     * @throws GDO_DBException
+     */
     private function isGPT(): bool
     {
-        return $this->getUser() === Module_ChatGPT::instance()->cfgApiUser();
+        return $this->getUser() === Module_ChatGPT::instance()->cfgApiDogUser(DOG_Message::$LAST_MESSAGE->server)->getGDOUser();
+    }
+
+    private function isDog(): bool
+    {
+        $dog = $this->getConversation()->getRoom()->getServer()->getDog();
+        return $dog->getGDOUser() === $this->getUser();
     }
 
 }
