@@ -39,7 +39,7 @@ final class Module_ChatGPT extends GDO_Module
 	public function getClasses(): array
 	{
 		return [
-            GDO_Conversation::class,
+            GDO_GPTConversation::class,
             GDO_GPTMessage::class,
 		];
 	}

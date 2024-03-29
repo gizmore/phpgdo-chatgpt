@@ -1,7 +1,7 @@
 <?php
 namespace GDO\ChatGPT\Method;
 
-use GDO\ChatGPT\GDO_Conversation;
+use GDO\ChatGPT\GDO_GPTConversation;
 use GDO\Core\GDO_DBException;
 use GDO\Core\GDT;
 use GDO\Dog\DOG_Command;
@@ -21,7 +21,7 @@ final class Close extends DOG_Command
      */
     public function dogExecute(DOG_Message $message): GDT
     {
-        if (!($conv = GDO_Conversation::getConversation($message->room)))
+        if (!($conv = GDO_GPTConversation::getConversation($message->room)))
         {
             return $this->error('err_gpt_not_open');
         }

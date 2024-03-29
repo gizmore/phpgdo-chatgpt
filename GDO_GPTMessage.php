@@ -21,7 +21,7 @@ final class GDO_GPTMessage extends GDO
         return false;
     }
 
-    public static function log(GDO_Conversation $conversation, DOG_Message $message): void
+    public static function log(GDO_GPTConversation $conversation, DOG_Message $message): void
     {
         echo "GPT logging {$message->text}\n";
         self::blank([
@@ -34,7 +34,7 @@ final class GDO_GPTMessage extends GDO
      * @throws GDO_DBException
      * @return self[]
      */
-    public static function getLast(GDO_Conversation $conversation, int $historyCount): array
+    public static function getLast(GDO_GPTConversation $conversation, int $historyCount): array
     {
         $messages = self::table()->select()
             ->where("gptm_conversation={$conversation->getID()}")
@@ -47,7 +47,7 @@ final class GDO_GPTMessage extends GDO
         return $messages;
     }
 
-    public static function clearMessageQueue(GDO_Conversation $conversation): void
+    public static function clearMessageQueue(GDO_GPTConversation $conversation): void
     {
         $now = Time::getDate();
         self::table()->update()->set("gptm_sent='{$now}'")->where("gptm_conversation={$conversation->getID()} AND gptm_sent IS NULL")->exec();
@@ -57,7 +57,7 @@ final class GDO_GPTMessage extends GDO
     {
         return [
             GDT_AutoInc::make('gptm_id'),
-            GDT_Object::make('gptm_conversation')->table(GDO_Conversation::table()),
+            GDT_Object::make('gptm_conversation')->table(GDO_GPTConversation::table()),
             GDT_Text::make('gptm_text')->notNull(),
             GDT_CreatedBy::make('gptm_creator'),
             GDT_CreatedAt::make('gptm_created'),
@@ -65,7 +65,7 @@ final class GDO_GPTMessage extends GDO
         ];
     }
 
-    public function getConversation(): GDO_Conversation
+    public function getConversation(): GDO_GPTConversation
     {
         return $this->gdoValue('gptm_conversation');
     }

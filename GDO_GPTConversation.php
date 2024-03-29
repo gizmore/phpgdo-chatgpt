@@ -18,9 +18,12 @@ use GDO\Dog\GDT_Room;
 use GDO\UI\GDT_Title;
 use OpenAI\Client;
 
-final class GDO_Conversation extends GDO
+final class GDO_GPTConversation extends GDO
 {
 
+    /**
+     * @throws GDO_DBException
+     */
     public static function started(DOG_Message $message): bool
     {
         return self::getConversation($message->room) !== null;
@@ -127,6 +130,9 @@ final class GDO_Conversation extends GDO
                 'gptm_sent' => Time::getDate(),
             ])->insert();
         }
+
+        print_r($messages);
+        print_r($aitext);
 
         return $aitext;
     }

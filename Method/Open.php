@@ -1,7 +1,7 @@
 <?php
 namespace GDO\ChatGPT\Method;
 
-use GDO\ChatGPT\GDO_Conversation;
+use GDO\ChatGPT\GDO_GPTConversation;
 use GDO\ChatGPT\GDO_GPTMessage;
 use GDO\ChatGPT\GDT_LanguageModel;
 use GDO\ChatGPT\Module_ChatGPT;
@@ -51,11 +51,11 @@ final class Open extends DOG_Command
 
     public function dogExecute(DOG_Message $message, string $model): GDT
     {
-        if (GDO_Conversation::started($message))
+        if (GDO_GPTConversation::started($message))
         {
             return $this->error('err_conv_started');
         }
-        GDO_Conversation::start($message, $model);
+        GDO_GPTConversation::start($message, $model);
         return $this->message('msg_chatgpt_started', [$model]);
     }
 
@@ -68,7 +68,7 @@ final class Open extends DOG_Command
         {
             if ($this->isEnabled())
             {
-                if ($conv = GDO_Conversation::getConversation($room))
+                if ($conv = GDO_GPTConversation::getConversation($room))
                 {
                     $gpt = Module_ChatGPT::instance()->cfgApiDogUser($message->server);
                     $text = $message->text;
@@ -86,7 +86,7 @@ final class Open extends DOG_Command
 
                         $room->send("ChatGPT says {$reply}");
 
-                        $message = new DOG_Message();
+                        $message = new DOG_Message(false);
                         $message->user($gpt);
                         $message->room($room);
                         $message->server($room->getServer());
@@ -126,7 +126,7 @@ final class Open extends DOG_Command
         if ($user === $gpt)
         {
             $room = DOG_Message::$LAST_MESSAGE->room;
-            if ($conv = GDO_Conversation::getConversation($room))
+            if ($conv = GDO_GPTConversation::getConversation($room))
             {
                 $message = new DOG_Message(false);
                 $message->room($room);
@@ -145,19 +145,20 @@ final class Open extends DOG_Command
     {
         if ($this->isEnabled())
         {
-            if ($conv = GDO_Conversation::getConversation($room))
+            if ($conv = GDO_GPTConversation::getConversation($room))
             {
+                $message = new DOG_Message(false);
+                $message->room($room);
+                $message->server($room->getServer());
+                $message->text($text);
+                $message->user($room->getServer()->getDog());
+                GDO_GPTMessage::log($conv, $message);
+
                 $gpt = Module_ChatGPT::instance()->cfgApiDogUser($room->getServer());
 
                 if (str_starts_with($text, "{$gpt->renderFullName()}: "))
                 {
-                    $message = new DOG_Message(false);
-                    $message->room($room);
-                    $message->server($room->getServer());
-                    $message->text($text);
-                    $message->user($room->getServer()->getDog());
-                    GDO_GPTMessage::log($conv, $message);
-                    $reply = $conv->promptTheAI($this->getConfigValueRoom($room, 'lookback'), $this->cfgTemperature($room));
+                   $reply = $conv->promptTheAI($this->getConfigValueRoom($room, 'lookback'), $this->cfgTemperature($room));
                     if (preg_match('/^ChatGPT[:{}0-9 ]*::(.*)/', $reply, $matches))
                     {
                         $reply = trim($matches[1]);
@@ -169,23 +170,6 @@ final class Open extends DOG_Command
                     $message->server($room->getServer());
                     $message->text($reply);
                     $room->getServer()->enqueue($message);
-//                    Dog::instance()->event('dog_message', $message);
-
-//                    $room->send($reply);
-//                    if (preg_match('/^ChatGPT[{}0-9 ]*::(.*)/', $reply, $matches))
-//                    {
-//                        $reply = trim($matches[1]);
-//                    }
-////                    $message->reply($reply);
-//                    if (str_starts_with($reply, $room->getTrigger()))
-//                    {
-////                        $message = new DOG_Message(true);
-////                        $message->room($room);
-////                        $message->server($room->getServer());
-////                        $message->text($reply);
-////                        $message->user(Module_ChatGPT::instance()->cfgApiDogUser($message->server));
-//                        $this->executeCommandForAI($message, $reply);
-//                    }
                 }
             }
         }

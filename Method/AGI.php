@@ -1,7 +1,7 @@
 <?php
 namespace GDO\ChatGPT\Method;
 
-use GDO\ChatGPT\GDO_Conversation;
+use GDO\ChatGPT\GDO_GPTConversation;
 use GDO\ChatGPT\Module_ChatGPT;
 use GDO\Core\GDO_DBException;
 use GDO\Core\GDT;
@@ -43,7 +43,7 @@ final class AGI extends DOG_Command
     public function dogExecute(DOG_Message $message, string $answer, string $prompt, array $commandParts): GDT
     {
         $room = $message->room;
-        if ($conv = GDO_Conversation::getConversation($room))
+        if ($conv = GDO_GPTConversation::getConversation($room))
         {
             $gpt = Module_ChatGPT::instance()->cfgApiDogUser($message->server);
             if ($message->user === $gpt)

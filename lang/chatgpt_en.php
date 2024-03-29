@@ -3,7 +3,9 @@ namespace GDO\ChatGPT\lang;
 
 return [
     'mt_chatgpt_open' => 'Start listening with chatgpt.',
+    'model' => 'Model',
     'msg_chatgpt_started' => 'Added %s chatgpt functionality in this room.',
+    'err_conv_started' => 'Conversation has already been started.',
 
     'mt_chatgpt_close' => 'Stop listening with chatgpt.',
     'err_gpt_not_open' => 'This chatroom has no GPT listener assigned.',
@@ -26,4 +28,6 @@ return [
 
     'mt_chatgpt_condense' => 'Evolve by setting the dynamic part of your genome.',
     'msg_condensed' => 'Your dynamic genome has been set. Follow up prompt: %s',
+
+    'mt_chatgpt_ack' => 'ChatGPT\'s method to acknowledge a prompt',
 ];
