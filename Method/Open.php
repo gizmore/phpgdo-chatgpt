@@ -40,7 +40,7 @@ final class Open extends DOG_Command
     {
         return [
             GDT_UInt::make('lookback')->initial('15'),
-            GDT_Float::make('gpt_temperature')->initial('0.5')->notNull()->min(0)->max(1),
+            GDT_Float::make('gpt_temperature')->initial('0.1')->notNull()->min(0)->max(1),
         ];
     }
 

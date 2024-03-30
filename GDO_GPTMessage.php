@@ -37,7 +37,7 @@ final class GDO_GPTMessage extends GDO
     public static function getLast(GDO_GPTConversation $conversation, int $historyCount): array
     {
         $messages = self::table()->select()
-            ->where("gptm_conversation={$conversation->getID()}")
+            ->where("gptm_conversation={$conversation->getID()} AND gptm_sent IS NULL")
             ->order("gptm_created DESC")
             ->limit($historyCount)
             ->exec()->fetchAllObjects();
